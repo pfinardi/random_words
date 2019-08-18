@@ -1,0 +1,66 @@
+#!/bin/bash
+
+#----------------------------
+# help function (-h)
+#----------------------------
+function usage()
+{
+echo "Usage: random_words [ options ]"
+echo "-d  Dictionary full path (default: ./dictionary/dictionary_it.txt)"
+echo "-s  Separator (default: blank)"
+echo "-w  Number of words (default: 3)"
+exit 2
+}
+
+
+#----------------------------
+# function to generate random numbers
+#----------------------------
+generate_random() {
+    RANDOM_NUMBER=`/usr/bin/perl -e "print int(rand($dict_words_nr));"`
+}
+
+
+#-----------------------------
+# MAIN
+#-----------------------------
+
+# Default settings
+dictionary=$( dirname "${BASH_SOURCE[0]}" )/dictionary/dictionary_it.txt
+words_num=3
+separator=" "
+result=""
+
+## List of options the program will accept;
+## those options that take arguments are followed by a colon
+## (only options with argument needs ":", "h" option hasn't it)
+optstring=hd:w:s:
+
+## The loop calls getopts until there are no more options on the command line
+## Each option is stored in $opt, any option arguments are stored in OPTARG
+while getopts $optstring opt
+do
+case $opt in
+d) dictionary=$OPTARG ;; ## $OPTARG contains the argument to the option
+s) separator=$OPTARG ;;
+w) words_num=$OPTARG ;;
+h) usage;;
+*) exit 1 ;;
+esac
+done
+
+dict_words_nr=$(wc -w $dictionary |awk '{ print $1}')
+
+for ((i=1; i<=$words_num; i++)); do
+   generate_random
+   randomWord=`head -$RANDOM_NUMBER $dictionary | tail -1`
+   if [ "$i" != 1 ] ; then
+       result=$result$separator
+   fi
+   result=$result$randomWord
+done
+
+
+echo "$result"
+
+exit 0
